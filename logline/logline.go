@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"os"
 	"sync"
 )
 
@@ -16,8 +15,16 @@ import (
 type LogLine struct {
 	buf    *bytes.Buffer
 	sep    string
-	logger *log.Logger
+	logger Logger
 	mu     sync.Mutex
+}
+
+// Logger interface specifies the methods a Logger should implement
+// to be used by LogLine
+//
+// The Logger type from log package implements this interface
+type Logger interface {
+	Print(v ...interface{})
 }
 
 type Info struct {
@@ -27,8 +34,16 @@ type Info struct {
 	Separator string
 
 	// Logger where the line will be written to.
-	// Stderr by default (same as log package)
-	Logger *log.Logger
+	// By default uses the log package. Could be a log.Logger object.
+	Logger Logger
+}
+
+// DefaultLogger used by a new LogLine object. Uses the standard
+// Print() from log package
+type DefaultLogger struct{}
+
+func (l *DefaultLogger) Print(v ...interface{}) {
+	log.Print(v...)
 }
 
 // New creates a new log line buffer. Call Print() functions then
@@ -46,7 +61,7 @@ func NewWithInfo(info Info) *LogLine {
 		info.Separator = ". "
 	}
 	if info.Logger == nil {
-		info.Logger = log.New(os.Stderr, "", log.LstdFlags) // same as 'std' on log package
+		info.Logger = &DefaultLogger{}
 	}
 	return &LogLine{
 		buf:    &bytes.Buffer{},

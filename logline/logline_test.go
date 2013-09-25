@@ -8,12 +8,11 @@ import (
 	"testing"
 )
 
-func ExampleNewWithInfo() {
-	logger := log.New(os.Stdout, "", 0)
+func ExampleNew() {
+	log.SetOutput(os.Stdout)
+	log.SetFlags(0)
 
-	ll := NewWithInfo(Info{
-		Logger: logger,
-	})
+	ll := New()
 
 	ll.Print("hi")
 	ll.Printf("go%s", "lang")
@@ -21,6 +20,22 @@ func ExampleNewWithInfo() {
 
 	// Output:
 	// hi. golang.
+}
+
+func ExampleNewWithInfo() {
+	logger := log.New(os.Stdout, "main: ", 0)
+
+	ll := NewWithInfo(Info{
+		Logger:    logger,
+		Separator: ", ",
+	})
+
+	ll.Print("hi")
+	ll.Printf("go%s", "lang")
+	ll.Write()
+
+	// Output:
+	// main: hi, golang,
 }
 
 // One Logline object can be used by multiple gotoutines.
